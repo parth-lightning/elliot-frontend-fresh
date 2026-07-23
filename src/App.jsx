@@ -8,6 +8,17 @@ import { getHistory, addHistoryEntry } from './utils/history.js'
 import { makeThumbnail } from './utils/thumbnail.js'
 import { exportReportPdf } from './utils/pdfExport.js'
 
+const ANALYSIS_STEPS = [
+  'Uploading screenshot...',
+  'Preprocessing image...',
+  'Detecting UI components...',
+  'Evaluating accessibility...',
+  'Analyzing layout & spacing...',
+  'Checking visual hierarchy...',
+  'Generating recommendations...',
+  'Preparing final report...',
+]
+
 export default function App() {
   const [page, setPage] = useState('dashboard')
   const [aiOnline, setAiOnline] = useState(false)
@@ -19,6 +30,9 @@ export default function App() {
   const [analyzing, setAnalyzing] = useState(false)
   const [error, setError] = useState('')
   const [fileName, setFileName] = useState('')
+
+  const [progress, setProgress] = useState(0)
+  const [currentStep, setCurrentStep] = useState(0)
 
   const [history, setHistory] = useState(() => getHistory())
 
@@ -45,8 +59,37 @@ export default function App() {
     setError('')
     setSummary(null)
 
+    setProgress(0)
+    setCurrentStep(0)
+
+    let fakeProgress = 0
+
+    const timer = setInterval(() => {
+      fakeProgress = Math.min(
+        95,
+        fakeProgress + Math.random() * 10 + 5
+      )
+
+      setProgress(Math.round(fakeProgress))
+
+      setCurrentStep(
+        Math.min(
+          ANALYSIS_STEPS.length - 1,
+          Math.floor(fakeProgress / (100 / ANALYSIS_STEPS.length))
+        )
+      )
+    }, 500)
+
     try {
       const data = await analyzeScreenshot(selectedFile)
+
+      clearInterval(timer)
+
+      setProgress(100)
+      setCurrentStep(ANALYSIS_STEPS.length - 1)
+
+      // Let the user briefly see 100%
+      await new Promise(resolve => setTimeout(resolve, 350))
 
       setReport(data)
       setFileName(selectedFile.name)
@@ -62,16 +105,19 @@ export default function App() {
       setHistory(nextHistory)
 
     } catch (err) {
-      console.error("FULL ERROR:", err)
+      clearInterval(timer)
+
+      console.error('FULL ERROR:', err)
 
       setError(
         err.response?.data?.detail
           ? String(err.response.data.detail)
-          : "Could not analyze that screenshot. Check the backend is running and try again."
+          : 'Could not analyze that screenshot. Check the backend is running and try again.'
       )
-
     } finally {
       setAnalyzing(false)
+      setProgress(0)
+      setCurrentStep(0)
     }
   }
 
@@ -81,7 +127,7 @@ export default function App() {
     exportReportPdf({
       fileName,
       report,
-      summary
+      summary,
     })
   }
 
@@ -89,7 +135,7 @@ export default function App() {
     exportReportPdf({
       fileName: entry.fileName,
       report: entry.report,
-      summary: null
+      summary: null,
     })
   }
 
@@ -104,15 +150,13 @@ export default function App() {
 
   return (
     <div className="min-h-screen flex bg-paper">
-
-      <Sidebar 
-        page={page} 
-        onNavigate={setPage} 
-        aiOnline={aiOnline} 
+      <Sidebar
+        page={page}
+        onNavigate={setPage}
+        aiOnline={aiOnline}
       />
 
       <main className="flex-1 min-w-0">
-
         {(page === 'dashboard' || page === 'new') && (
           <DashboardPage
             selectedFile={selectedFile}
@@ -121,6 +165,11 @@ export default function App() {
             summary={summary}
             analyzing={analyzing}
             error={error}
+
+            progress={progress}
+            currentStep={currentStep}
+            analysisSteps={ANALYSIS_STEPS}
+
             onFileSelected={handleFileSelected}
             onAnalyze={handleAnalyze}
             onExport={handleExport}
@@ -130,9 +179,9 @@ export default function App() {
         )}
 
         {page === 'history' && (
-          <HistoryPage 
-            history={history} 
-            onViewHistory={handleViewHistory} 
+          <HistoryPage
+            history={history}
+            onViewHistory={handleViewHistory}
           />
         )}
 
@@ -143,9 +192,7 @@ export default function App() {
             onExportEntry={handleExportEntry}
           />
         )}
-
       </main>
-
     </div>
   )
 }

@@ -1,46 +1,101 @@
-import ExportPanel from '../components/ExportPanel.jsx'
-
 export default function ReportsPage({ history, onViewHistory, onExportEntry }) {
   return (
-    <div className="p-8 max-w-[1400px] mx-auto flex flex-col gap-6">
-      <div>
-        <h1 className="font-display text-2xl font-semibold text-ink">Reports</h1>
-        <p className="text-sm text-muted mt-1">Revisit or export any past scan</p>
+    <div className="mx-auto max-w-screen-2xl px-10 py-8">
+      <div className="mb-10 flex items-end justify-between border-b border-line pb-6">
+        <div>
+          <h1 className="font-display text-3xl font-semibold text-ink">
+            Reports
+          </h1>
+
+          <p className="mt-2 text-muted">
+            Browse previous UI/UX analyses and export detailed reports.
+          </p>
+        </div>
+
+        <div className="text-right">
+          <p className="text-xs uppercase tracking-widest text-muted">
+            Total Reports
+          </p>
+
+          <p className="text-3xl font-semibold text-ink">
+            {history.length}
+          </p>
+        </div>
       </div>
-      {history.length === 0 && (
-        <p className="text-sm text-muted font-mono">No reports yet — run an analysis first.</p>
-      )}
-      <div className="grid gap-4">
-        {history.map((entry) => (
-          <div key={entry.id} className="bg-panel border border-line rounded-xl p-5 flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3 min-w-0">
-              {entry.thumbnail && (
-                <img src={entry.thumbnail} alt="" className="w-14 h-10 object-cover rounded border border-line" />
-              )}
+
+      {history.length === 0 ? (
+        <div className="rounded-xl border border-dashed border-line py-20 text-center">
+          <p className="text-lg text-muted">
+            No reports available.
+          </p>
+
+          <p className="mt-2 text-sm text-muted">
+            Run an analysis to generate your first report.
+          </p>
+        </div>
+      ) : (
+        <div className="overflow-hidden rounded-2xl border border-line bg-panel">
+          <div className="grid grid-cols-[70px_1fr_120px_140px] border-b border-line bg-panel/70 px-6 py-4 text-xs font-semibold uppercase tracking-wider text-muted">
+            <div>Preview</div>
+            <div>Report</div>
+            <div>Score</div>
+            <div className="text-right">Actions</div>
+          </div>
+
+          {history.map((entry) => (
+            <div
+              key={entry.id}
+              className="grid grid-cols-[70px_1fr_120px_140px] items-center border-b border-line px-6 py-5 transition-colors hover:bg-panel-hover"
+            >
+              <div>
+                {entry.thumbnail ? (
+                  <img
+                    src={entry.thumbnail}
+                    alt=""
+                    className="h-12 w-16 rounded object-cover border border-line"
+                  />
+                ) : (
+                  <div className="h-12 w-16 rounded border border-line" />
+                )}
+              </div>
+
               <div className="min-w-0">
-                <p className="font-medium text-ink truncate">{entry.fileName}</p>
-                <p className="text-xs text-muted font-mono">
-                  {entry.report.overall_score}/10 · {entry.report.total_issues} issues
+                <p className="truncate font-medium text-ink">
+                  {entry.fileName}
+                </p>
+
+                <p className="mt-1 text-sm text-muted">
+                  {entry.report.total_issues} issues detected
                 </p>
               </div>
+
+              <div>
+                <span className="text-xl font-semibold text-ink">
+                  {entry.report.overall_score}
+                </span>
+
+                <span className="text-muted"> / 10</span>
+              </div>
+
+              <div className="flex justify-end gap-2">
+                <button
+                  onClick={() => onViewHistory(entry)}
+                  className="rounded-lg border border-line px-4 py-2 text-sm hover:bg-panel-hover"
+                >
+                  View
+                </button>
+
+                <button
+                  onClick={() => onExportEntry(entry)}
+                  className="rounded-lg border border-line px-4 py-2 text-sm hover:bg-panel-hover"
+                >
+                  Export
+                </button>
+              </div>
             </div>
-            <div className="flex items-center gap-2 shrink-0">
-              <button
-                onClick={() => onViewHistory(entry)}
-                className="text-xs font-mono uppercase tracking-wide px-3 py-1.5 rounded-md border border-line text-muted hover:border-ink/40 hover:text-ink transition-colors"
-              >
-                View
-              </button>
-              <button
-                onClick={() => onExportEntry(entry)}
-                className="text-xs font-mono uppercase tracking-wide px-3 py-1.5 rounded-md border border-line text-muted hover:border-ink/40 hover:text-ink transition-colors"
-              >
-                PDF
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
