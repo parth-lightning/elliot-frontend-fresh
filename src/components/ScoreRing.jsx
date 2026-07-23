@@ -6,49 +6,119 @@ function colorFor(score) {
   return '#D64545'
 }
 
+function labelFor(score) {
+  if (score >= 9) return 'Excellent'
+  if (score >= 8) return 'Good'
+  if (score >= 5) return 'Fair'
+  return 'Needs Work'
+}
+
 function verdictCopy(score) {
-  if (score >= 8) return 'Great job! Your UI/UX is good but there are some areas to improve.'
-  if (score >= 5) return 'Decent foundation, but a few issues need attention.'
-  return 'Significant UX gaps — worth prioritizing fixes soon.'
+  if (score >= 8)
+    return 'The interface demonstrates a strong user experience with only minor improvements recommended.'
+
+  if (score >= 5)
+    return 'The interface is functional but several usability and accessibility improvements are recommended.'
+
+  return 'The interface contains significant usability concerns and should be reviewed before release.'
 }
 
 export default function ScoreRing({ score }) {
   const [animated, setAnimated] = useState(0)
-  const radius = 68
+
+  const radius = 72
   const circumference = 2 * Math.PI * radius
+
   const pct = Math.max(0, Math.min(10, score)) / 10
-  const ring = colorFor(score)
+
+  const color = colorFor(score)
 
   useEffect(() => {
-    const t = setTimeout(() => setAnimated(pct), 80)
-    return () => clearTimeout(t)
+    const timer = setTimeout(() => setAnimated(pct), 120)
+    return () => clearTimeout(timer)
   }, [pct])
 
-  const offset = circumference * (1 - animated)
-
   return (
-    <div className="bg-panel border border-line rounded-xl p-6 flex flex-col items-center text-center">
-      <h2 className="font-display font-semibold text-ink self-start">Overall UI/UX Score</h2>
-      <svg width="180" height="180" viewBox="0 0 180 180" className="mt-4">
-        <circle cx="90" cy="90" r={radius} fill="none" stroke="#E4E7EC" strokeWidth="14" />
-        <circle
-          cx="90" cy="90" r={radius} fill="none"
-          stroke={ring} strokeWidth="14" strokeLinecap="round"
-          strokeDasharray={circumference} strokeDashoffset={offset}
-          transform="rotate(-90 90 90)"
-          style={{ transition: 'stroke-dashoffset 900ms cubic-bezier(0.16, 1, 0.3, 1)' }}
-        />
-        <text x="90" y="88" textAnchor="middle" className="font-display" fontSize="40" fontWeight="700" fill="#14161A">
-          {score}
-        </text>
-        <text x="90" y="108" textAnchor="middle" className="font-mono" fontSize="13" fill="#6B7280">
-          / 10
-        </text>
-      </svg>
-      <p className="font-display font-semibold mt-1" style={{ color: ring }}>
-        {score >= 8 ? 'Good' : score >= 5 ? 'Fair' : 'Needs Work'}
-      </p>
-      <p className="text-sm text-muted mt-2">{verdictCopy(score)}</p>
+    <div className="rounded-2xl border border-line bg-panel p-8">
+      <div className="border-b border-line pb-4">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted">
+          Overall Assessment
+        </p>
+
+        <h2 className="mt-2 font-display text-xl font-semibold text-ink">
+          UI / UX Score
+        </h2>
+      </div>
+
+      <div className="mt-8 flex justify-center">
+        <div className="relative">
+          <svg width="200" height="200" viewBox="0 0 200 200">
+            <circle
+              cx="100"
+              cy="100"
+              r={radius}
+              fill="none"
+              stroke="#E5E7EB"
+              strokeWidth="14"
+            />
+
+            <circle
+              cx="100"
+              cy="100"
+              r={radius}
+              fill="none"
+              stroke={color}
+              strokeWidth="14"
+              strokeLinecap="round"
+              strokeDasharray={circumference}
+              strokeDashoffset={circumference * (1 - animated)}
+              transform="rotate(-90 100 100)"
+              style={{
+                transition:
+                  'stroke-dashoffset 900ms cubic-bezier(0.16,1,0.3,1)',
+              }}
+            />
+
+            <text
+              x="100"
+              y="96"
+              textAnchor="middle"
+              fontSize="42"
+              fontWeight="700"
+              fill="#14161A"
+            >
+              {score}
+            </text>
+
+            <text
+              x="100"
+              y="118"
+              textAnchor="middle"
+              fontSize="14"
+              fill="#6B7280"
+            >
+              out of 10
+            </text>
+          </svg>
+        </div>
+      </div>
+
+      <div className="mt-6 text-center">
+        <span
+          className="inline-flex rounded-full border px-4 py-1 text-sm font-semibold"
+          style={{
+            color,
+            borderColor: `${color}33`,
+            backgroundColor: `${color}12`,
+          }}
+        >
+          {labelFor(score)}
+        </span>
+
+        <p className="mt-5 text-sm leading-7 text-muted">
+          {verdictCopy(score)}
+        </p>
+      </div>
     </div>
   )
 }
