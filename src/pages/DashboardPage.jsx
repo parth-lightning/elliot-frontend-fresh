@@ -6,7 +6,6 @@ import IssuesPanel from '../components/IssuesPanel.jsx'
 import RecommendationsPanel from '../components/RecommendationsPanel.jsx'
 import HistoryTable from '../components/HistoryTable.jsx'
 import ExportPanel from '../components/ExportPanel.jsx'
-import { computeBreakdown } from '../utils/categoryBreakdown.js'
 
 export default function DashboardPage({
   selectedFile, imageUrl, report, summary,
@@ -14,7 +13,38 @@ export default function DashboardPage({
   onFileSelected, onAnalyze, onExport,
   history, onViewHistory,
 }) {
-  const breakdown = report ? computeBreakdown(report.issues) : null
+  const breakdown = report
+  ? [
+      {
+        label: "Layout & Structure",
+        score: report.category_scores.layout_structure,
+      },
+      {
+        label: "Typography",
+        score: report.category_scores.typography,
+      },
+      {
+        label: "Color & Contrast",
+        score: report.category_scores.color_contrast,
+      },
+      {
+        label: "Accessibility",
+        score: report.category_scores.accessibility,
+      },
+      {
+        label: "Navigation",
+        score: report.category_scores.navigation,
+      },
+      {
+        label: "Consistency",
+        score: report.category_scores.consistency,
+      },
+      {
+        label: "User Experience",
+        score: report.category_scores.user_experience,
+      },
+    ]
+  : null
 
   return (
     <div className="p-8 max-w-[1400px] mx-auto flex flex-col gap-6">
