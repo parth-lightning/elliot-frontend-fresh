@@ -1,8 +1,12 @@
 import axios from 'axios'
 
-// All calls go through the /api prefix, which vite.config.js proxies
-// to the FastAPI backend at http://127.0.0.1:8000.
-const client = axios.create({ baseURL: '/api', timeout: 60000 })
+// Configurable API base URL:
+// In production on Netlify, can point directly to the Render backend URL (e.g. https://<backend>.onrender.com)
+// or fallback to '/api' (proxied by Netlify redirects or local Vite proxy).
+const rawApiUrl = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '')
+const baseURL = rawApiUrl || '/api'
+
+const client = axios.create({ baseURL, timeout: 60000 })
 
 /**
  * Sends a screenshot to POST /analyze and returns the structured

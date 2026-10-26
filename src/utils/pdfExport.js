@@ -24,6 +24,15 @@ export function exportReportPdf({ fileName, report, summary }) {
   doc.text(`Overall score: ${report.overall_score}/10  (${report.total_issues} issues)`, margin, y)
   y += 24
 
+  if (report.is_demo) {
+    doc.setFont('helvetica', 'bold')
+    doc.setFontSize(10)
+    doc.setTextColor(160, 90, 0)
+    doc.text('DEMO REPORT — simulated sample findings; not an AI assessment.', margin, y)
+    doc.setTextColor(20)
+    y += 20
+  }
+
   if (summary?.executive_summary) {
     doc.setFont('helvetica', 'bold')
     doc.setFontSize(12)

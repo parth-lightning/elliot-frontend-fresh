@@ -93,6 +93,7 @@ export default function HistoryTable({ entries, onView, compact }) {
                         </p>
                         <p className="mt-1 text-xs text-muted">
                           {entry.report.total_issues} issues detected
+                          {entry.report.is_demo ? ' · Demo report' : ''}
                         </p>
                       </div>
                     </td>

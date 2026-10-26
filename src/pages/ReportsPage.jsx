@@ -66,6 +66,7 @@ export default function ReportsPage({ history, onViewHistory, onExportEntry }) {
 
                 <p className="mt-1 text-sm text-muted">
                   {entry.report.total_issues} issues detected
+                  {entry.report.is_demo ? ' · Demo report' : ''}
                 </p>
               </div>
 

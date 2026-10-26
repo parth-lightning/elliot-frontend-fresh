@@ -6,6 +6,7 @@ import IssuesPanel from '../components/IssuesPanel.jsx'
 import RecommendationsPanel from '../components/RecommendationsPanel.jsx'
 import HistoryTable from '../components/HistoryTable.jsx'
 import ExportPanel from '../components/ExportPanel.jsx'
+import { computeBreakdown } from '../utils/categoryBreakdown.js'
 
 function SectionHeader({ eyebrow, title, description, rightSlot = null }) {
   return (
@@ -54,37 +55,18 @@ export default function DashboardPage({
   onViewHistory,
 }) {
   const breakdown = report
-  ? [
-      {
-        label: "Layout & Structure",
-        score: report.category_scores.layout_structure,
-      },
-      {
-        label: "Typography",
-        score: report.category_scores.typography,
-      },
-      {
-        label: "Color & Contrast",
-        score: report.category_scores.color_contrast,
-      },
-      {
-        label: "Accessibility",
-        score: report.category_scores.accessibility,
-      },
-      {
-        label: "Navigation",
-        score: report.category_scores.navigation,
-      },
-      {
-        label: "Consistency",
-        score: report.category_scores.consistency,
-      },
-      {
-        label: "User Experience",
-        score: report.category_scores.user_experience,
-      },
-    ]
-  : null
+    ? report.category_scores
+      ? [
+          { label: 'Layout & Structure', score: report.category_scores.layout_structure ?? 0 },
+          { label: 'Typography', score: report.category_scores.typography ?? 0 },
+          { label: 'Color & Contrast', score: report.category_scores.color_contrast ?? 0 },
+          { label: 'Accessibility', score: report.category_scores.accessibility ?? 0 },
+          { label: 'Navigation', score: report.category_scores.navigation ?? 0 },
+          { label: 'Consistency', score: report.category_scores.consistency ?? 0 },
+          { label: 'User Experience', score: report.category_scores.user_experience ?? 0 },
+        ]
+      : computeBreakdown(report.issues)
+    : null
 
   return (
     <div className="mx-auto flex max-w-[1400px] flex-col gap-8 px-6 py-8 lg:px-8">
@@ -109,10 +91,14 @@ export default function DashboardPage({
             </p>
             <p className="mt-2 text-4xl font-semibold tracking-tight text-ink">
               {report.overall_score}
-              <span className="ml-1 text-lg font-medium text-muted">/100</span>
+              <span className="ml-1 text-lg font-medium text-muted">/10</span>
             </p>
             <p className="mt-1 text-sm text-muted">
-              {summary?.executive_summary ? 'Executive summary available' : 'Detailed results ready'}
+              {report.is_demo
+                ? 'Demo report · simulated sample findings'
+                : summary?.executive_summary
+                  ? 'Executive summary available'
+                  : 'Detailed results ready'}
             </p>
           </div>
         ) : null}
@@ -143,7 +129,9 @@ export default function DashboardPage({
             <SectionHeader
               eyebrow="Analysis"
               title="Results Overview"
-              description="A concise summary of the interface quality assessment, with score context and issue distribution."
+              description={report.is_demo
+                ? 'Demo report: the score and findings are simulated examples, not an AI assessment of this screenshot.'
+                : 'A concise summary of the interface quality assessment, with score context and issue distribution.'}
             />
             <div className="grid lg:grid-cols-12 gap-6">
                 <div className="lg:col-span-4">
